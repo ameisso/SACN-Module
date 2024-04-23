@@ -27,7 +27,6 @@ module.exports = {
             const elts = address.split('/');
             let channel = isNaN(elts.at(-1)) ? 0 : elts.at(-1);
             let dmxValue = Math.floor(args[0].value)
-
             lastDmxFrame[channel] = dmxValue;
             sACNServer.send({
                 payload: lastDmxFrame,
@@ -43,7 +42,6 @@ module.exports = {
         if (address == "/sacn") {
             let dmxAddress = " " + Math.floor(args[0].value)
             let dmxValue = Math.floor(args[1].value)
-            console.log("DMX " + dmxAddress + " " + dmxValue)
             lastDmxFrame[dmxAddress] = dmxValue;
             universeChanged = true;
 
@@ -52,7 +50,6 @@ module.exports = {
             const elts = address.split('/');
             let channel = isNaN(elts.at(-1)) ? 0 : elts.at(-1);
             let dmxValue = Math.floor(args[0].value)
-            console.log("DMX " + channel + " " + dmxValue)
             lastDmxFrame[channel] = dmxValue;
             universeChanged = true;
         }
