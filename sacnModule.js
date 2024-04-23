@@ -1,4 +1,3 @@
-var artnet = nativeRequire('artnet')
 var { Sender } = nativeRequire('sacn');
 
 const ip = "192.168.2.177";
@@ -11,11 +10,15 @@ const sACNServer = new Sender({
         priority: 100,
     }
 });
+var lastDmxFrame = new Uint8Array(512);
 
 module.exports = {
 
     init: function () {
         console.log("loading artnet module")
+        for (let i = 0; i < lastDmxFrame.length; i++) {
+            lastDmxFrame[i] = 0;
+        }
     },
 
     oscInFilter: function (data) {
@@ -27,20 +30,19 @@ module.exports = {
     oscOutFilter: function (data) {
         var { address, args, host, port, clientId } = data
         if (address == "/sacn") {
-            let dmxAddress =" "+ Math.floor(args[0].value)
+            let dmxAddress = " " + Math.floor(args[0].value)
             let dmxValue = Math.floor(args[1].value)
-            //console.log("DMX " + dmxAddress + " " + dmxValue)
+            console.log("DMX " + dmxAddress + " " + dmxValue)
+            lastDmxFrame[dmxAddress] = dmxValue;
             sACNServer.send({
-                payload: {
-                    1: dmxValue
-                },
-                useRawDmxValues:true
-            }).catch(e => console.log("error sending SACN "+e))
-        }
+                payload: lastDmxFrame,
+                useRawDmxValues: true
+            }).catch(e => console.log("error sending SACN " + e))
+    }
         else {
-            return { address, args, host, port }
-        }
-    },
+        return { address, args, host, port }
+    }
+},
 
     unload: function () {
         console.log("unloading artnet module")
