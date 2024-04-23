@@ -23,8 +23,18 @@ module.exports = {
 
     oscInFilter: function (data) {
         var { address, args, host, port } = data
-        return { address, args, host, port }
+        if (address.startsWith("/sacn/")) {
+            const elts = address.split('/');
+            let channel = isNaN(elts.at(-1)) ? 0 : elts.at(-1);
+            let dmxValue = Math.floor(args[0].value)
 
+            lastDmxFrame[channel] = dmxValue;
+            sACNServer.send({
+                payload: lastDmxFrame,
+                useRawDmxValues: true
+            }).catch(e => console.log("error sending SACN " + e))
+        }
+        return { address, args, host, port }
     },
 
     oscOutFilter: function (data) {
