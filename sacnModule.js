@@ -29,20 +29,33 @@ module.exports = {
 
     oscOutFilter: function (data) {
         var { address, args, host, port, clientId } = data
+        var universeChanged = false;
         if (address == "/sacn") {
             let dmxAddress = " " + Math.floor(args[0].value)
             let dmxValue = Math.floor(args[1].value)
             console.log("DMX " + dmxAddress + " " + dmxValue)
             lastDmxFrame[dmxAddress] = dmxValue;
+            universeChanged = true;
+
+        }
+        else if (address.startsWith("/sacn/")) {
+            const elts = address.split('/');
+            let channel = isNaN(elts.at(-1)) ? 0 : elts.at(-1);
+            let dmxValue = Math.floor(args[0].value)
+            console.log("DMX " + channel + " " + dmxValue)
+            lastDmxFrame[channel] = dmxValue;
+            universeChanged = true;
+        }
+        else {
+            return { address, args, host, port }
+        }
+        if (universeChanged) {
             sACNServer.send({
                 payload: lastDmxFrame,
                 useRawDmxValues: true
             }).catch(e => console.log("error sending SACN " + e))
-    }
-        else {
-        return { address, args, host, port }
-    }
-},
+        }
+    },
 
     unload: function () {
         console.log("unloading artnet module")
