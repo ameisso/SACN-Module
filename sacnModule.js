@@ -30,7 +30,9 @@ module.exports = {
     },
 
     oscInFilter: function (data) {
+
         var { address, args, host, port } = data
+       // console.log("in"+address)
         var universeChanged = false;
         if (address.startsWith("/sacn/")) {
             const elts = address.split('/');
@@ -39,30 +41,50 @@ module.exports = {
             lastDmxFrame[channel] = dmxValue;
             var universeChanged = true;
         }
-        else if (address == "/color/1") {
-            lastDmxFrame[1] = 0;
-            lastDmxFrame[3] = 255;
-            lastDmxFrame[5] = 0;
-            lastDmxFrame[12] = args[0].value;
-
-            lastDmxFrame[101] = 0;
-            lastDmxFrame[102] = 255;
-            lastDmxFrame[103] = 0;
+        else if (address == "/yeux/pan") {
+            lastDmxFrame[228] = args[0].value;
+            lastDmxFrame[253] = 66-args[0].value;
             var universeChanged = true;
-            console.log("color 1 set")
         }
-
-        else if (address == "/color/2") {
-            lastDmxFrame[1] = 255;
-            lastDmxFrame[3] = 255;
-            lastDmxFrame[5] = 0;
-            lastDmxFrame[12] = args[0].value;
-            lastDmxFrame[101] = 255;
-            lastDmxFrame[102] = 255;
-            lastDmxFrame[103] = 0;
+        else if (address == "/yeux/tilt") {
+            lastDmxFrame[230] = args[0].value;
+            lastDmxFrame[255] = args[0].value;
             var universeChanged = true;
-            console.log("color 2 set")
         }
+        else if (address == "/yeux/zoom") {
+            lastDmxFrame[234] = args[0].value;
+            lastDmxFrame[259 ] = args[0].value;
+            var universeChanged = true;
+        }
+        else if (address == "/yeux/dimmer") {
+            lastDmxFrame[226] = args[0].value;
+            lastDmxFrame[251] = args[0].value;
+            var universeChanged = true;
+        }
+        else if (address == "/train/pan") {
+            lastDmxFrame[283] = args[0].value;
+            lastDmxFrame[313] = 66-args[0].value;
+            var universeChanged = true;
+        }
+        else if (address == "/train/tilt") {
+            lastDmxFrame[285] = args[0].value;
+            lastDmxFrame[315] = args[0].value;
+            var universeChanged = true;
+        }
+        else if (address == "/train/zoom") {
+            lastDmxFrame[289] = args[0].value;
+            lastDmxFrame[319] = args[0].value;
+            var universeChanged = true;
+        }
+        else if (address == "/train/dimmer") {
+            lastDmxFrame[281    ] = args[0].value;
+            lastDmxFrame[311] = args[0].value;
+            var universeChanged = true;
+        }
+        else
+        {
+        console.log("unhandled "+address)
+    }
 
         if (universeChanged) {
             sACNServer.send({
