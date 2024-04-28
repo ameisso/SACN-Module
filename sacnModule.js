@@ -41,50 +41,7 @@ module.exports = {
             lastDmxFrame[channel] = dmxValue;
             var universeChanged = true;
         }
-        else if (address == "/yeux/pan") {
-            lastDmxFrame[228] = args[0].value;
-            lastDmxFrame[253] = 66-args[0].value;
-            var universeChanged = true;
-        }
-        else if (address == "/yeux/tilt") {
-            lastDmxFrame[230] = args[0].value;
-            lastDmxFrame[255] = args[0].value;
-            var universeChanged = true;
-        }
-        else if (address == "/yeux/zoom") {
-            lastDmxFrame[234] = args[0].value;
-            lastDmxFrame[259 ] = args[0].value;
-            var universeChanged = true;
-        }
-        else if (address == "/yeux/dimmer") {
-            lastDmxFrame[226] = args[0].value;
-            lastDmxFrame[251] = args[0].value;
-            var universeChanged = true;
-        }
-        else if (address == "/train/pan") {
-            lastDmxFrame[283] = args[0].value;
-            lastDmxFrame[313] = 66-args[0].value;
-            var universeChanged = true;
-        }
-        else if (address == "/train/tilt") {
-            lastDmxFrame[285] = args[0].value;
-            lastDmxFrame[315] = args[0].value;
-            var universeChanged = true;
-        }
-        else if (address == "/train/zoom") {
-            lastDmxFrame[289] = args[0].value;
-            lastDmxFrame[319] = args[0].value;
-            var universeChanged = true;
-        }
-        else if (address == "/train/dimmer") {
-            lastDmxFrame[281    ] = args[0].value;
-            lastDmxFrame[311] = args[0].value;
-            var universeChanged = true;
-        }
-        else
-        {
-        console.log("unhandled "+address)
-    }
+       
 
         if (universeChanged) {
             sACNServer.send({
@@ -121,7 +78,6 @@ module.exports = {
     },
 
     unload: function () {
-
         console.log("unloading artnet module")
         sACNServer.close();
         this.reload();
@@ -129,7 +85,6 @@ module.exports = {
 
     reload: function () {
         console.log("reloading artnet module")
-
     }
 
 
