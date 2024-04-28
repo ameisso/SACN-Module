@@ -70,10 +70,10 @@ function reload() {
             universe: dmxUniverses[i],
             //iface: ip,
             reuseAddr: true,
-            useRawDmxValues: true, //todo : doesnt work
             defaultPacketOptions: {
                 sourceName: "O-S-C SACN U" + dmxUniverses[i],
                 priority: 100,
+                useRawDmxValues: true
             }
         });
         lastDmxFrames[i] = new Uint8Array(512);
