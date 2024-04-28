@@ -95,7 +95,7 @@ function updateUniverseChannel(universe, channel, value) {
     let frameIndex = getUniverseArrayIndex(universe)
     let frame = lastDmxFrames[frameIndex]
     if (frame == undefined) {
-        console.log("frame undefined")
+        console.log("sACN is not connected to universe " + universe)
         return false;
     }
     frame[channel] = value;
@@ -116,7 +116,6 @@ function getUniverseArrayIndex(universeIndex) {
 
 function sendsACNFrame(universeIndex) {
     let arrayIndex = getUniverseArrayIndex(universeIndex)
-    console.log("sACN universe " + universeIndex + " changed")
     sACNSenders[arrayIndex].send({
         payload: lastDmxFrames[universeIndex - 1],
     }).catch(e => console.log("error sending SACN " + e))
@@ -135,6 +134,5 @@ function splitArgsandUpdateFrame(address, args) {
     let dmxValue = Math.floor(args[0].value)
     if (updateUniverseChannel(universe, dmxAddress, dmxValue)) {
         universeChanged = universe;
-        console.log("universe " + universe + " changed")
     }
 }
