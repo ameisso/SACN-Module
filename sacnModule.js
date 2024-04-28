@@ -13,7 +13,22 @@ function init() {
 
 function oscInFilter(data) {
     var { address, args, host, port } = data
+    var universeChanged = false;
+    if (address == "/sacn") { //only for universe 1
+        let universe = 1;
+        let dmxAddress = " " + Math.floor(args[0].value)
+        let dmxValue = Math.floor(args[1].value)
+        if (updateUniverseChannel(universe, dmxAddress, dmxValue)) {
+            universeChanged = universe;
+        }
+    }
+    else if (address.startsWith("/sacn/")) {
+        splitArgsandUpdateFrame(address, args)
+    }
 
+    if (universeChanged) {
+        sendsACNFrame(universeChanged)
+    }
     return { address, args, host, port }
 }
 
@@ -33,30 +48,14 @@ function oscOutFilter(data) {
         }
     }
     else if (address.startsWith("/sacn/")) {
-        const elts = address.split('/');
-        let universe = -1;
-        if (elts.length == 3) {
-            universe = 1;
-        }
-        else {
-            universe = isNaN(elts.at(2)) ? 0 : elts.at(2);
-        }
-        let dmxAddress = isNaN(elts.at(-1)) ? 0 : elts.at(-1);
-        let dmxValue = Math.floor(args[0].value)
-        if (updateUniverseChannel(universe, dmxAddress, dmxValue)) {
-            universeChanged = universe;
-        }
-
+        splitArgsandUpdateFrame(address, args)
     }
     else {
         return { address, args, host, port }
     }
 
     if (universeChanged) {
-        let arrayIndex = getUniverseArrayIndex(universeChanged)
-        sACNSenders[arrayIndex].send({
-            payload: lastDmxFrames[universeChanged - 1],
-        }).catch(e => console.log("error sending SACN " + e))
+        sendsACNFrame(universeChanged)
     }
 }
 
@@ -113,4 +112,29 @@ function getUniverseArrayIndex(universeIndex) {
         }
     }
     console.log("no universe found for index " + universeIndex)
+}
+
+function sendsACNFrame(universeIndex) {
+    let arrayIndex = getUniverseArrayIndex(universeIndex)
+    console.log("sACN universe " + universeIndex + " changed")
+    sACNSenders[arrayIndex].send({
+        payload: lastDmxFrames[universeIndex - 1],
+    }).catch(e => console.log("error sending SACN " + e))
+}
+
+function splitArgsandUpdateFrame(address, args) {
+    const elts = address.split('/');
+    let universe = -1;
+    if (elts.length == 3) {
+        universe = 1;
+    }
+    else {
+        universe = isNaN(elts.at(2)) ? 0 : elts.at(2);
+    }
+    let dmxAddress = isNaN(elts.at(-1)) ? 0 : elts.at(-1);
+    let dmxValue = Math.floor(args[0].value)
+    if (updateUniverseChannel(universe, dmxAddress, dmxValue)) {
+        universeChanged = universe;
+        console.log("universe " + universe + " changed")
+    }
 }
