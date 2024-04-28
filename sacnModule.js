@@ -34,7 +34,13 @@ function oscOutFilter(data) {
     }
     else if (address.startsWith("/sacn/")) {
         const elts = address.split('/');
-        let universe = isNaN(elts.at(-2)) ? 0 : elts.at(-2);
+        let universe = -1;
+        if (elts.length == 3) {
+            universe = 1;
+        }
+        else {
+            universe = isNaN(elts.at(2)) ? 0 : elts.at(2);
+        }
         let dmxAddress = isNaN(elts.at(-1)) ? 0 : elts.at(-1);
         let dmxValue = Math.floor(args[0].value)
         if (updateUniverseChannel(universe, dmxAddress, dmxValue)) {
