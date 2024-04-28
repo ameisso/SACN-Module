@@ -60,7 +60,7 @@ function oscOutFilter(data) {
 }
 
 function unload() {
-    console.log("unloading artnet module")
+    console.log("unloading sACN module")
     for (let i = 0; i < dmxUniverses.length; i++) {
         let sender = sACNSenders[i];
         if (sender != undefined) {
