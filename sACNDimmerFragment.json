@@ -151,7 +151,7 @@
             "value": "",
             "default": "",
             "linkId": "",
-            "address": "auto",
+            "address": "/sacn/@{parent.variables.universe}/@{parent.variables.channel}",
             "preArgs": "",
             "decimals": 2,
             "target": "",
