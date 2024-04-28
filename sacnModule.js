@@ -1,92 +1,96 @@
 var { Sender } = nativeRequire('sacn');
+module.exports = { init, oscInFilter, oscOutFilter, unload };
 
 const ip = "192.168.2.177";
-const dmxUniverse = 1;
-const sACNServer = new Sender({
-    universe: dmxUniverse,
-    //iface: ip,
-    reuseAddr: true,
-    useRawDmxValues: true,
-    defaultPacketOptions: {
-        sourceName: "O-S-C SACN U1",
-        priority: 100,
+const dmxUniverses = [1, 2];
+const sACNSenders = [];
+const lastDmxFrames = [];
+
+
+function init() {
+    reload();
+}
+
+function oscInFilter(data) {
+    var { address, args, host, port } = data
+
+    return { address, args, host, port }
+}
+
+function oscOutFilter(data) {
+    var { address, args, host, port, clientId } = data
+    var universeChanged = false;
+    if (address == "/sacn") { //only for universe 1
+        let universe = 1;
+        let dmxAddress = " " + Math.floor(args[0].value)
+        let dmxValue = Math.floor(args[1].value)
+        updateUniverseChannel(universe, dmxAddress, dmxValue)
+        universeChanged = universe;
     }
-});
-var lastDmxFrame = new Uint8Array(512);
-
-module.exports = {
-
-    init: function () {
-        setTimeout(function () {
-            console.log("\n\n--------------------")
-            console.log("loading sACN module")
-            console.log("dmx universe " + dmxUniverse)
-            console.log("--------------------")
-        }, 1000);
-
-        for (let i = 0; i < lastDmxFrame.length; i++) {
-            lastDmxFrame[i] = 0;
-        }
-    },
-
-    oscInFilter: function (data) {
-
-        var { address, args, host, port } = data
-       // console.log("in"+address)
-        var universeChanged = false;
-        if (address.startsWith("/sacn/")) {
-            const elts = address.split('/');
-            let channel = isNaN(elts.at(-1)) ? 0 : elts.at(-1);
-            let dmxValue = Math.floor(args[0].value);
-            lastDmxFrame[channel] = dmxValue;
-            var universeChanged = true;
-        }
-       
-
-        if (universeChanged) {
-            sACNServer.send({
-                payload: lastDmxFrame
-            }).catch(e => console.log("error sending SACN " + e))
-        }
+    else if (address == "/sacn/reload") {
+        reload();
+    }
+    else if (address.startsWith("/sacn/")) {
+        const elts = address.split('/');
+        let universe = isNaN(elts.at(-2)) ? 0 : elts.at(-2);
+        let dmxAddress = isNaN(elts.at(-1)) ? 0 : elts.at(-1);
+        let dmxValue = Math.floor(args[0].value)
+        updateUniverseChannel(universe, dmxAddress, dmxValue)
+        universeChanged = universe;
+    }
+    else {
         return { address, args, host, port }
-    },
-
-    oscOutFilter: function (data) {
-        var { address, args, host, port, clientId } = data
-        var universeChanged = false;
-        if (address == "/sacn") {
-            let dmxAddress = " " + Math.floor(args[0].value)
-            let dmxValue = Math.floor(args[1].value)
-            lastDmxFrame[dmxAddress] = dmxValue;
-            universeChanged = true;
-        }
-        else if (address.startsWith("/sacn/")) {
-            const elts = address.split('/');
-            let channel = isNaN(elts.at(-1)) ? 0 : elts.at(-1);
-            let dmxValue = Math.floor(args[0].value)
-            lastDmxFrame[channel] = dmxValue;
-            universeChanged = true;
-        }
-        else {
-            return { address, args, host, port }
-        }
-        if (universeChanged) {
-            sACNServer.send({
-                payload: lastDmxFrame
-            }).catch(e => console.log("error sending SACN " + e))
-        }
-    },
-
-    unload: function () {
-        console.log("unloading artnet module")
-        sACNServer.close();
-        this.reload();
-    },
-
-    reload: function () {
-        console.log("reloading artnet module")
     }
 
+    if (universeChanged) {
+        sACNSenders[universeChanged - 1].send({
+            payload: lastDmxFrames[universeChanged - 1],
+        }).catch(e => console.log("error sending SACN " + e))
+    }
+}
 
+function unload() {
+    console.log("unloading artnet module")
+    for (let i = 0; i < dmxUniverses.length; i++) {
+        sACNSenders[i].close();
+    }
+    reload();
+}
 
+function reload() {
+    for (let i = 0; i < dmxUniverses.length; i++) {
+        sACNSenders[i] = new Sender({
+            universe: dmxUniverses[i],
+            //iface: ip,
+            reuseAddr: true,
+            useRawDmxValues: true, //todo : doesnt work
+            defaultPacketOptions: {
+                sourceName: "O-S-C SACN U" + dmxUniverses[i],
+                priority: 100,
+            }
+        });
+        lastDmxFrames[i] = new Uint8Array(512);
+    }
+    setTimeout(function () {
+        console.log("\n\n--------------------")
+        console.log("loading sACN module")
+        console.log("dmx universe " + dmxUniverses)
+        console.log("--------------------")
+    }, 1000);
+}
+
+function updateUniverseChannel(universe, channel, value) {
+    console.log("universe " + universe + " channel " + channel + " value " + value)
+    let frame = lastDmxFrames[universe - 1]
+    frame[channel] = value;
+    lastDmxFrames[universe - 1] = frame;
+}
+
+function getUniverse(universeIndex) {
+    for (let i = 0; i < dmxUniverses.length; i++) {
+        if (dmxUniverses[i] == universeIndex) {
+            return i;
+        }
+        return sACNSenders[universe];
+    }
 }
