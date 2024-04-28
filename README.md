@@ -24,7 +24,7 @@ in O-S-C set the osc address to :
 This module can forward sacn. So when it receives an OSC message from an application, sacn is updated
 
 #### TODO
-- fix : ability to send 0-255 value 
 - dynamically open/close universes 
 - ability to save/recall snapshots of a frame with intensity 
+- define fineChannel
 - ...

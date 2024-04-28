@@ -9,6 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "sacn": "^4.4.0"
+    "sacn": "github:k-yle/sACN"
   }
 }

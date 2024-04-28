@@ -23,7 +23,7 @@ function oscInFilter(data) {
         }
     }
     else if (address.startsWith("/sacn/")) {
-        splitArgsandUpdateFrame(address, args)
+        universeChanged = splitArgsandUpdateFrame(address, args)
     }
 
     if (universeChanged) {
@@ -48,7 +48,7 @@ function oscOutFilter(data) {
         }
     }
     else if (address.startsWith("/sacn/")) {
-        splitArgsandUpdateFrame(address, args)
+        universeChanged = splitArgsandUpdateFrame(address, args)
     }
     else {
         return { address, args, host, port }
@@ -134,5 +134,9 @@ function splitArgsandUpdateFrame(address, args) {
     let dmxValue = Math.floor(args[0].value)
     if (updateUniverseChannel(universe, dmxAddress, dmxValue)) {
         universeChanged = universe;
+        return universeChanged;
+    }
+    else {
+        return false
     }
 }
