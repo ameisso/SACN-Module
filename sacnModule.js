@@ -115,6 +115,7 @@ function getUniverseArrayIndex(universeIndex) {
 }
 
 function sendsACNFrame(universeIndex) {
+   // console.log("sending sACN frame for universe " + universeIndex)
     let arrayIndex = getUniverseArrayIndex(universeIndex)
     sACNSenders[arrayIndex].send({
         payload: lastDmxFrames[universeIndex - 1],

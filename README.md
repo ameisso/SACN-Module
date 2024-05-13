@@ -16,8 +16,6 @@ in O-S-C set the osc address to :
 `/sacn/2/4` to update channel 4 of universe 2
 `/sacn` where first arg is the channel and second arg the value (only for universe 1) 
 
-! values are from 1-100
-
 `/sacn/reload` to reload the sender 
 
 ##### forward sACN

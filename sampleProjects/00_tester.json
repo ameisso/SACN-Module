@@ -107,8 +107,8 @@
         "props": {
           "variables": {
             "universe": 1,
-            "channel": 1,
-            "name": "1@1"
+            "channels": "[   62,   63,   64 ]",
+            "name": "multichannel"
           }
         },
         "address": "auto",
@@ -131,34 +131,9 @@
         "fallback": "",
         "props": {
           "variables": {
-            "universe": 2,
-            "channel": 2,
-            "name": "2@2"
-          }
-        },
-        "address": "auto",
-        "variables": "@{parent.variables}"
-      },
-      {
-        "type": "fragment",
-        "top": 100,
-        "left": 190,
-        "lock": false,
-        "id": "fragment_3",
-        "visible": true,
-        "interaction": true,
-        "comments": "",
-        "width": 90,
-        "height": 356,
-        "expand": true,
-        "css": "",
-        "file": "sACNDimmerFragment.json",
-        "fallback": "",
-        "props": {
-          "variables": {
-            "universe": 10,
-            "channel": 2,
-            "name": "10@2"
+            "universe": 1,
+            "channels": 62,
+            "name": "single"
           }
         },
         "address": "auto",
