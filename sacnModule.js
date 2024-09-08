@@ -1,14 +1,23 @@
-var { Sender } = nativeRequire('sacn');
+var { Sender, Receiver } = nativeRequire('sacn');
 module.exports = { init, oscInFilter, oscOutFilter, unload };
 
-const ip = "192.168.2.177";
+const targetIp = "192.168.2.177";
 const dmxUniverses = [1, 2, 10];
 const sACNSenders = [];
+const sACNReicevers = [];
+
 const lastDmxFrames = [];
 
 
 function init() {
     reload();
+}
+
+function handleReceivedFrame(frame) {
+    // console.log("frame received from " + frame.sourceName+':'+frame.sourceAddress)  
+    // for (var channel in frame.payload) {
+    //     console.log("channel " + channel + " value " + frame.payload[channel]);
+    // }
 }
 
 function oscInFilter(data) {
@@ -67,6 +76,12 @@ function unload() {
             sACNSenders[i].close();
         }
     }
+    for (receiver of sACNReicevers) {
+        if (receiver != undefined) {
+            sACNReicevers[i].close();
+        }
+
+    }
 }
 
 function reload() {
@@ -83,6 +98,16 @@ function reload() {
         });
         lastDmxFrames[i] = new Uint8Array(512);
     }
+
+    sACNReicevers[0] = new Receiver({
+        universe: 1,
+        reuseAddr: true
+    });
+
+    sACNReicevers[0].on('packet', (packet) => {
+        handleReceivedFrame(packet)
+    });
+
     setTimeout(function () {
         console.log("\n\n--------------------")
         console.log("loading sACN module")
@@ -115,7 +140,7 @@ function getUniverseArrayIndex(universeIndex) {
 }
 
 function sendsACNFrame(universeIndex) {
-   // console.log("sending sACN frame for universe " + universeIndex)
+    // console.log("sending sACN frame for universe " + universeIndex)
     let arrayIndex = getUniverseArrayIndex(universeIndex)
     sACNSenders[arrayIndex].send({
         payload: lastDmxFrames[universeIndex - 1],
