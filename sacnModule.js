@@ -19,10 +19,51 @@ function init() {
 }
 
 function handleReceivedFrame(frame) {
-    // console.log("frame received from " + frame.sourceName+':'+frame.sourceAddress)  
+    console.log("------------------\nframe received from " + frame.sourceName + ':' + frame.sourceAddress)
     // for (var channel in frame.payload) {
     //     console.log("channel " + channel + " value " + frame.payload[channel]);
     // }
+
+
+    //CUSTOM CODE STARTS HERE 
+    let targetChannel = -1
+    for (var channel in frame.payload) {
+        //   console.log("channel " + channel + " value " + frame.payload[channel]);
+        if (frame.payload[channel] > 0) {
+            targetChannel = channel
+        }
+    }
+
+    if (targetChannel == -1) {
+        console.log("no channel found")
+        return
+    }
+    else {
+        console.log("target channel " + targetChannel)
+    }
+
+    var beyondIp = '192.168.1.240';
+    var beyondPort = 8000;
+    var beyondAddress = '/beyond/general/FocusCellIndex' 
+    console.log("sending beyond address " + beyondAddress)
+    send(beyondIp, beyondPort, beyondAddress, {
+        type: 'i',
+        value: targetChannel
+    })
+    send(beyondIp, beyondPort, '/beyond/general/StartCell')
+
+    var madIp = '127.0.0.1';
+    var madPort = 8010;
+    var columnIndex = targetChannel
+    var madAddress = '/cues/selected/scenes/by_cell/col_' + columnIndex
+
+    send(madIp, madPort, madAddress, {
+        type: 'i',
+        value: 1
+    })
+    //CUSTOM CODE ENDS HERE
+
+
 }
 
 function oscInFilter(data) {
