@@ -1,16 +1,21 @@
 var { Sender, Receiver } = nativeRequire('sacn');
 module.exports = { init, oscInFilter, oscOutFilter, unload };
 
-const targetIp = "192.168.2.177";
-const dmxUniverses = [1, 2, 10];
+const targetIp = "192.168.1.177";
+const dmxSendUniverses = [1, 2, 10];
 const sACNSenders = [];
-const sACNReicevers = [];
-
+const dmxReceiveUniverse = [1, 42];
+const sACNReceiver = new Receiver({
+    universes: dmxReceiveUniverse
+})
 const lastDmxFrames = [];
 
 
 function init() {
     reload();
+    sACNReceiver.on('packet', (packet) => {
+        handleReceivedFrame(packet);
+    });
 }
 
 function handleReceivedFrame(frame) {
@@ -70,28 +75,22 @@ function oscOutFilter(data) {
 
 function unload() {
     console.log("unloading sACN module")
-    for (let i = 0; i < dmxUniverses.length; i++) {
+    for (let i = 0; i < dmxSendUniverses.length; i++) {
         let sender = sACNSenders[i];
         if (sender != undefined) {
             sACNSenders[i].close();
         }
     }
-    for (receiver of sACNReicevers) {
-        if (receiver != undefined) {
-            sACNReicevers[i].close();
-        }
-
-    }
 }
 
 function reload() {
-    for (let i = 0; i < dmxUniverses.length; i++) {
+    for (let i = 0; i < dmxSendUniverses.length; i++) {
         sACNSenders[i] = new Sender({
-            universe: dmxUniverses[i],
+            universe: dmxSendUniverses[i],
             //iface: ip,
             reuseAddr: true,
             defaultPacketOptions: {
-                sourceName: "O-S-C SACN U" + dmxUniverses[i],
+                sourceName: "O-S-C SACN U" + dmxSendUniverses[i],
                 priority: 100,
                 useRawDmxValues: true
             }
@@ -99,19 +98,11 @@ function reload() {
         lastDmxFrames[i] = new Uint8Array(512);
     }
 
-    sACNReicevers[0] = new Receiver({
-        universe: 1,
-        reuseAddr: true
-    });
-
-    sACNReicevers[0].on('packet', (packet) => {
-        handleReceivedFrame(packet)
-    });
-
     setTimeout(function () {
         console.log("\n\n--------------------")
         console.log("loading sACN module")
-        console.log("dmx universe " + dmxUniverses)
+        console.log("dmx sending universe " + dmxSendUniverses)
+        console.log("dmx receiving universe " + dmxReceiveUniverse)
         console.log("--------------------")
     }, 1000);
 }
@@ -129,8 +120,8 @@ function updateUniverseChannel(universe, channel, value) {
 }
 
 function getUniverseArrayIndex(universeIndex) {
-    for (let i = 0; i < dmxUniverses.length; i++) {
-        if (dmxUniverses[i] == universeIndex) {
+    for (let i = 0; i < dmxSendUniverses.length; i++) {
+        if (dmxSendUniverses[i] == universeIndex) {
             {
                 return i;
             }
