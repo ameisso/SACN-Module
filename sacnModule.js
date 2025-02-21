@@ -51,6 +51,11 @@ function oscOutFilter(data) {
     var universeChanged = false;
     if (address == "/sacn/reload") {
         console.log("reloading sACN universes")
+        if (args.length > 0) {
+            targetIp = args[0].value;
+            console.log("new target IP :",targetIp);
+        }
+
         reload();
     }
     else if (address == "/sacn") { //only for universe 1
@@ -131,7 +136,7 @@ function getUniverseArrayIndex(universeIndex) {
 }
 
 function sendsACNFrame(universeIndex) {
-     console.log("sending sACN frame for universe " + universeIndex)
+    console.log("sending sACN frame for universe " + universeIndex)
     let arrayIndex = getUniverseArrayIndex(universeIndex)
     sACNSenders[arrayIndex].send({
         payload: lastDmxFrames[universeIndex - 1],

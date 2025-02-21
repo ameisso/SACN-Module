@@ -17,6 +17,7 @@ in O-S-C set the osc address to :
 `/sacn` where first arg is the channel and second arg the value (only for universe 1) 
 
 `/sacn/reload` to reload the sender 
+`/sacn/reload ["192.168.2.254]` will reload the sender with a specific iface IP
 
 ##### forward sACN
 This module can forward sacn. So when it receives an OSC message from an application, sacn is updated
