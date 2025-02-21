@@ -1,8 +1,8 @@
 var { Sender, Receiver } = nativeRequire('sacn');
 module.exports = { init, oscInFilter, oscOutFilter, unload };
 
-const targetIp = "192.168.1.177";
 const dmxSendUniverses = [1, 2, 10];
+const targetIp = "192.168.2.254";
 const sACNSenders = [];
 const dmxReceiveUniverse = [1, 42];
 const sACNReceiver = new Receiver({
@@ -20,50 +20,9 @@ function init() {
 
 function handleReceivedFrame(frame) {
     console.log("------------------\nframe received from " + frame.sourceName + ':' + frame.sourceAddress)
-    // for (var channel in frame.payload) {
-    //     console.log("channel " + channel + " value " + frame.payload[channel]);
-    // }
-
-
-    //CUSTOM CODE STARTS HERE 
-    let targetChannel = -1
     for (var channel in frame.payload) {
-        //   console.log("channel " + channel + " value " + frame.payload[channel]);
-        if (frame.payload[channel] > 0) {
-            targetChannel = channel
-        }
+        console.log("channel " + channel + " value " + frame.payload[channel]);
     }
-
-    if (targetChannel == -1) {
-        console.log("no channel found")
-        return
-    }
-    else {
-        console.log("target channel " + targetChannel)
-    }
-
-    var beyondIp = '192.168.1.240';
-    var beyondPort = 8000;
-    var beyondAddress = '/beyond/general/FocusCellIndex' 
-    console.log("sending beyond address " + beyondAddress)
-    send(beyondIp, beyondPort, beyondAddress, {
-        type: 'i',
-        value: targetChannel
-    })
-    send(beyondIp, beyondPort, '/beyond/general/StartCell')
-
-    var madIp = '127.0.0.1';
-    var madPort = 8010;
-    var columnIndex = targetChannel
-    var madAddress = '/cues/selected/scenes/by_cell/col_' + columnIndex
-
-    send(madIp, madPort, madAddress, {
-        type: 'i',
-        value: 1
-    })
-    //CUSTOM CODE ENDS HERE
-
-
 }
 
 function oscInFilter(data) {
@@ -128,7 +87,7 @@ function reload() {
     for (let i = 0; i < dmxSendUniverses.length; i++) {
         sACNSenders[i] = new Sender({
             universe: dmxSendUniverses[i],
-            //iface: ip,
+            iface: targetIp,
             reuseAddr: true,
             defaultPacketOptions: {
                 sourceName: "O-S-C SACN U" + dmxSendUniverses[i],
@@ -172,11 +131,12 @@ function getUniverseArrayIndex(universeIndex) {
 }
 
 function sendsACNFrame(universeIndex) {
-    // console.log("sending sACN frame for universe " + universeIndex)
+     console.log("sending sACN frame for universe " + universeIndex)
     let arrayIndex = getUniverseArrayIndex(universeIndex)
     sACNSenders[arrayIndex].send({
         payload: lastDmxFrames[universeIndex - 1],
     }).catch(e => console.log("error sending SACN " + e))
+    //console.log("frame ",lastDmxFrames[universeIndex - 1])
 }
 
 function splitArgsandUpdateFrame(address, args) {
