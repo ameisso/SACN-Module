@@ -1,10 +1,10 @@
 var { Sender, Receiver } = nativeRequire('sacn');
 module.exports = { init, oscInFilter, oscOutFilter, unload };
 
-const dmxSendUniverses = [1, 2, 10];
-const targetIp = "192.168.2.254";
+let dmxSendUniverses = [1];
+let targetIp = "192.168.2.254";
 const sACNSenders = [];
-const dmxReceiveUniverse = [1, 42];
+let dmxReceiveUniverse = [1];
 const sACNReceiver = new Receiver({
     universes: dmxReceiveUniverse
 })
@@ -53,9 +53,25 @@ function oscOutFilter(data) {
         console.log("reloading sACN universes")
         if (args.length > 0) {
             targetIp = args[0].value;
-            console.log("new target IP :",targetIp);
+            console.log("new target IP :", targetIp);
         }
 
+        reload();
+    }
+    else if (address == "/sacn/sendUniverses") {
+        for (var i = 0; i < args.length; i++) {
+            dmxSendUniverses.push(args[i].value);
+            let newUniverses = Array.from(new Set(dmxSendUniverses));
+            dmxSendUniverses = newUniverses;
+        }
+        reload();
+    }
+    else if (address == "/sacn/receiveUniverses") {
+        for (var i = 0; i < args.length; i++) {
+            dmxReceiveUniverse.push(args[i].value);
+            let newUniverses = Array.from(new Set(dmxReceiveUniverse));
+            dmxReceiveUniverse = newUniverses;
+        }
         reload();
     }
     else if (address == "/sacn") { //only for universe 1

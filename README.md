@@ -18,12 +18,14 @@ in O-S-C set the osc address to :
 
 `/sacn/reload` to reload the sender 
 `/sacn/reload ["192.168.2.254]` will reload the sender with a specific iface IP
-
+`/sacn/sendUniverses [1]` will add a new send Universe to the list and reload (note : should be int parameter)
+`/sacn/receiveUniverses [10]` will add a new receive Universe to the list and reload (note : should be int parameter)
+ 
 ##### forward sACN
 This module can forward sacn. So when it receives an OSC message from an application, sacn is updated
 
 #### TODO
-- dynamically open/close universes 
+- dynamically close universes 
 - ability to save/recall snapshots of a frame with intensity 
 - define fineChannel
 - ...
